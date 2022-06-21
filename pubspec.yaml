@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  html: ^0.15.0
   http: ^0.13.4
   flutter_bloc: ^8.0.1
 
@@ -40,5 +41,5 @@ flutter_icons:
 flutter:
   uses-material-design: true
 
-  assets:
-    - assets/
+assets:
+  - assets/
