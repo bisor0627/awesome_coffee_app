@@ -11,15 +11,12 @@ Nodes are rendered in the order of children...starting with screen 1
 */
 
 class HttpManager {
-  late final String url;
-  String? userAgent;
-  late Document data;
-  HttpManager(this.url, {String? userAgent});
+  HttpManager();
 
-  Future<Document> init() async {
+  Future<Document> getHtml(String url, {String? userAgent}) async {
     final uri = Uri.parse(url);
-    final response = await http.get(uri, headers: {if (userAgent != null) 'User-Agent': userAgent ?? ''});
-    final document = parser.parse(utf8.decode(response.bodyBytes));
-    return document;
+    final response = await http.get(uri, headers: {if (userAgent != null) 'User-Agent': userAgent});
+    Document data = parser.parse(utf8.decode(response.bodyBytes));
+    return data;
   }
 }

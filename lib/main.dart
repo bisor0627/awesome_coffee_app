@@ -1,4 +1,10 @@
+import 'package:awesome_cafe/global/enum/view_state.dart';
+import 'package:awesome_cafe/global/provider/cafe_provider.dart';
+import 'package:awesome_cafe/global/provider/parent_provider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:html/dom.dart' show Document;
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,12 +15,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CafeProvider()),
+        // ChangeNotifierProvider(create: (_) => ParentProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Awesome Cafe',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const MyHomePage(title: 'Awesome Cafe'),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
@@ -30,17 +42,31 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   @override
+  void initState() {
+    Future.delayed(Duration(milliseconds: 250), () {
+      context.read<CafeProvider>().getCafe();
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [],
-        ),
-      ),
+      body: Consumer<CafeProvider>(builder: (_, watch, __) {
+        if (watch.state == ViewState.Busy) {
+          return const Center(
+            child: CupertinoActivityIndicator(),
+          );
+        }
+        return SingleChildScrollView(
+          child: Center(
+            child: Text('${watch.body}'),
+          ),
+        );
+      }),
     );
   }
 }
