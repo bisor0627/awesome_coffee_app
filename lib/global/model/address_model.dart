@@ -1,17 +1,18 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:latlng/latlng.dart';
+
 class AddresssModel {
   String? roadAddress;
   String? jibunAddress;
   String? englishAddress;
-  String? x;
-  String? y;
+  LatLng? latLng;
   AddresssModel({
     this.roadAddress,
     this.jibunAddress,
     this.englishAddress,
-    this.x,
-    this.y,
+    this.latLng,
   });
 
   Map<String, dynamic> toMap() {
@@ -19,8 +20,7 @@ class AddresssModel {
       'roadAddress': roadAddress,
       'jibunAddress': jibunAddress,
       'englishAddress': englishAddress,
-      'x': x,
-      'y': y,
+      'latLng': latLng,
     };
   }
 
@@ -29,8 +29,7 @@ class AddresssModel {
       roadAddress: map['roadAddress'] ?? null,
       jibunAddress: map['jibunAddress'] ?? null,
       englishAddress: map['englishAddress'] ?? null,
-      x: map['x'] ?? null,
-      y: map['y'] ?? null,
+      latLng: LatLng(double.parse(map['y']), double.parse(map['x'])),
     );
   }
 

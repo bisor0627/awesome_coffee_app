@@ -1,4 +1,6 @@
+import 'package:awesome_cafe/global/model/address_model.dart';
 import 'package:awesome_cafe/global/model/cafe_model.dart';
+import 'package:awesome_cafe/global/utils/http_manager.dart';
 
 String removeLocation(String param) {
   if (param.contains("### ")) {
@@ -36,7 +38,8 @@ CafeModel? sliceACafeSpec(String param) {
       //()
       String link = param.substring(param.indexOf('(') + 1, param.indexOf(')'));
       //- 위치 :
-      String location = param.substring(param.indexOf('- 위치') + 7, param.indexOf('- 규모'));
+      String location_str = param.substring(param.indexOf('- 위치') + 7, param.indexOf('- 규모'));
+
       //- 규모 :
       String scale = param.substring(param.indexOf('- 규모') + 7, param.indexOf('- 운영'));
       //- 규모 :
@@ -55,7 +58,8 @@ CafeModel? sliceACafeSpec(String param) {
       return CafeModel(
           name: name,
           link: link,
-          location: location,
+          location: location_str,
+          // address: AddresssModel.fromMap(location['addresses'][0]),
           scale: scale,
           placeFeatures: placeFeatures,
           hasSocket: hasSocket,
@@ -67,7 +71,8 @@ CafeModel? sliceACafeSpec(String param) {
       return CafeModel(
           name: "name",
           link: "link",
-          location: "location",
+          location: "loca",
+          address: null,
           howManySocket: "howManySocket",
           howFastWifi: "howFastWifi",
           otherFeatures: "otherFeatures");

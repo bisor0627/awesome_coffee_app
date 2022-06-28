@@ -1,9 +1,10 @@
-import 'dart:convert';
+import 'package:awesome_cafe/global/model/address_model.dart';
 
 class CafeModel {
   String name;
   String link;
   String location;
+  AddresssModel? address;
   String? scale;
   String? operatingTime;
   String? congestion;
@@ -18,6 +19,7 @@ class CafeModel {
     required this.name,
     required this.link,
     required this.location,
+    this.address,
     this.scale,
     this.operatingTime,
     this.congestion,

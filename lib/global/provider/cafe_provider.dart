@@ -1,18 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:awesome_cafe/global/model/address_model.dart';
 import 'package:awesome_cafe/global/model/cafe_model.dart';
 import 'package:awesome_cafe/global/provider/parent_provider.dart';
 import 'package:awesome_cafe/global/utils/http_manager.dart';
+import 'package:awesome_cafe/global/utils/keys.dart';
 import 'package:awesome_cafe/global/utils/string_util.dart';
 import 'package:flutter/material.dart';
 import 'package:html/dom.dart' show Document;
+import 'package:latlng/latlng.dart';
 
 class CafeProvider extends ParentProvider {
   String? body;
   List<String> items = [];
   Future pushCafe() async {}
   List<CafeModel?> cafeList = [];
+  List<LatLng> markers = [];
   Future getCafe() async {
     try {
       setStateBusy();
@@ -25,16 +29,35 @@ class CafeProvider extends ParentProvider {
 
         items = sliceACafe(inner.substring(inner.indexOf('## 지역'), inner.indexOf('## 도움을 주신 분들')));
 
-        setStateIdle();
+        // setStateIdle();
 
         items.forEach((element) {
           cafeList.add(sliceACafeSpec(element));
         });
+        getMarker();
+        setStateIdle();
       }
 
       // return true;
     } catch (e) {
       // return false;
+    }
+  }
+
+  Future getMarker() async {
+    final HttpManager httpManager = HttpManager();
+    for (var i = 0; i < cafeList.length; i++) {
+      if (cafeList[i]?.location != null) {
+        Map<String, dynamic> location = httpManager
+            .parseJson(await httpManager.getHttp('https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode', keys: {
+          'query': cafeList[i]!.location,
+        }, headers: {
+          'X-NCP-APIGW-API-KEY-ID': k_NCP_APIGW_ID,
+          'X-NCP-APIGW-API-KEY': k_NCP_APIGW_KEY
+        }));
+        cafeList[i]?.address = AddresssModel.fromMap(location['addresses'][0]);
+        // markers.add();
+      }
     }
   }
 }
