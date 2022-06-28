@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:awesome_cafe/global/model/cafe_model.dart';
 import 'package:awesome_cafe/global/provider/parent_provider.dart';
@@ -16,8 +17,8 @@ class CafeProvider extends ParentProvider {
     try {
       setStateBusy();
 
-      Document? data =
-          await HttpManager().getHtml('https://raw.githubusercontent.com/utilForever/awesome-cafe/main/README.md');
+      Document? data = HttpManager().parseDocument(
+          await HttpManager().getHttp('https://raw.githubusercontent.com/utilForever/awesome-cafe/main/README.md'));
 
       if (data.body?.innerHtml != null) {
         String inner = data.body?.innerHtml ?? '';
@@ -27,10 +28,10 @@ class CafeProvider extends ParentProvider {
         setStateIdle();
 
         items.forEach((element) {
-          debugPrint(element);
           cafeList.add(sliceACafeSpec(element));
         });
       }
+
       // return true;
     } catch (e) {
       // return false;
