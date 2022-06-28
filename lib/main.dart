@@ -1,9 +1,9 @@
 import 'package:awesome_cafe/global/enum/view_state.dart';
+import 'package:awesome_cafe/global/model/cafe_model.dart';
 import 'package:awesome_cafe/global/provider/cafe_provider.dart';
-import 'package:awesome_cafe/global/provider/parent_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:html/dom.dart' show Document;
+// import 'package:html/dom.dart' show Document;
 import 'package:provider/provider.dart';
 
 void main() {
@@ -61,11 +61,14 @@ class _MyHomePageState extends State<MyHomePage> {
             child: CupertinoActivityIndicator(),
           );
         }
-        return SingleChildScrollView(
-          child: Center(
-            child: Text('${watch.body}'),
-          ),
-        );
+        return ListView.builder(
+            itemCount: watch.cafeList.length,
+            itemBuilder: (context, index) {
+              CafeModel? item = watch.cafeList[index];
+              return Column(
+                children: [Text(item?.name ?? ''), Text(item?.link ?? ''), Text(item?.location ?? '')],
+              );
+            });
       }),
     );
   }
