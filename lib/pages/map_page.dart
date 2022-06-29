@@ -113,27 +113,28 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Consumer<CafeProvider>(builder: (_, watch, __) {
-        if (watch.state == ViewState.Busy) {
-          return const Center(
-            child: CupertinoActivityIndicator(),
+    return Consumer<CafeProvider>(builder: (_, watch, __) {
+      switch (watch.state) {
+        case ViewState.Busy:
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(widget.title),
+            ),
+            body: const Center(
+              child: CupertinoActivityIndicator(),
+            ),
           );
-        }
-        return mapBuilder(watch);
-      }),
-      bottomSheet: Consumer<CafeProvider>(builder: (_, watch, __) {
-        if (watch.state == ViewState.Busy) {
-          return const Center(
-            child: CupertinoActivityIndicator(),
-          );
-        }
-        return bottomList(context, watch);
-      }),
-    );
+        case ViewState.Error:
+        case ViewState.Idle:
+        default:
+          return Scaffold(
+              appBar: AppBar(
+                title: Text(widget.title),
+              ),
+              body: mapBuilder(watch),
+              bottomSheet: bottomList(context, watch));
+      }
+    });
   }
 
   SizedBox bottomList(BuildContext context, CafeProvider watch) {
