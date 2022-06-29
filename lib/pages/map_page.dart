@@ -10,6 +10,7 @@ import 'package:latlng/latlng.dart';
 import 'package:map/map.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key, required this.title}) : super(key: key);
@@ -63,7 +64,8 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  Widget _buildMarkerWidget(CafeModel cafe, Offset pos, Color color, [IconData icon = CupertinoIcons.placemark_fill]) {
+  Positioned _buildMarkerWidget(CafeModel cafe, Offset pos, Color color,
+      [IconData icon = CupertinoIcons.placemark_fill]) {
     return Positioned(
       left: pos.dx - 24,
       top: pos.dy - 24,
@@ -76,15 +78,13 @@ class _MapPageState extends State<MapPage> {
                 decoration: BoxDecoration(color: Colors.red.withOpacity(0.7), borderRadius: BorderRadius.circular(10)),
                 child: Column(children: [Text(cafe.name), Text(cafe.location)]),
               ),
-        onTap: () {
-          _launchUrl(Uri.parse(cafe.link));
+        onTap: () async {
+          Platform.isAndroid
+              ? await launchUrl(Uri.parse('http://map.naver.com/?query=${cafe.name}'))
+              : await launchURL(cafe.link);
         },
       ),
     );
-  }
-
-  void _launchUrl(Uri url) async {
-    if (!await launchUrl(url)) throw 'Could not launch $url';
   }
 
   Widget _myLocation(Offset pos, Color color, [IconData icon = CupertinoIcons.smallcircle_circle_fill]) {
@@ -146,8 +146,10 @@ class _MapPageState extends State<MapPage> {
           itemBuilder: (context, index) {
             CafeModel? item = watch.cafeList[index];
             return InkWell(
-              onTap: () {
-                _launchUrl(Uri.parse(item?.link ?? ''));
+              onTap: () async {
+                Platform.isAndroid
+                    ? await launchUrl(Uri.parse('http://map.naver.com/?query=${item?.name}'))
+                    : await launchURL(item?.link);
               },
               child: Column(
                 children: [Text(item?.name ?? ''), Text(item?.link ?? ''), Text(item?.address.toString() ?? '')],
@@ -161,11 +163,11 @@ class _MapPageState extends State<MapPage> {
     return MapLayoutBuilder(
       controller: controller,
       builder: (context, transformer) {
-        late dynamic markerWidgets = [];
-        if (watch.state != ViewState.Idle) {
-          markerWidgets = watch.cafeList.map(
+        late List<Positioned> markerWidgets = [];
+        if (watch.state == ViewState.Idle) {
+          markerWidgets.addAll(watch.cafeList.map(
             (cafe) => _buildMarkerWidget(cafe!, transformer.fromLatLngToXYCoords(cafe.address!.latLng!), Colors.red),
-          );
+          ));
         }
 
         final centerLocation =
@@ -210,5 +212,16 @@ class _MapPageState extends State<MapPage> {
         );
       },
     );
+  }
+
+  Future<void> launchURL(url) async {
+    if (url == null) return;
+    if (await canLaunchUrlString(url)) {
+      url = Uri.parse(url);
+      await launchUrl(url);
+    } else {
+      //http://map.naver.com/?query=카페 루보브
+      throw 'Could not launch $url';
+    }
   }
 }
