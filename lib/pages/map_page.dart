@@ -123,56 +123,7 @@ class _MapPageState extends State<MapPage> {
             child: CupertinoActivityIndicator(),
           );
         }
-        return MapLayoutBuilder(
-          controller: controller,
-          builder: (context, transformer) {
-            final markerWidgets = watch.cafeList.map(
-              (cafe) => _buildMarkerWidget(cafe!, transformer.fromLatLngToXYCoords(cafe.address!.latLng!), Colors.red),
-            );
-
-            final centerLocation =
-                Offset(transformer.constraints.biggest.width / 2, transformer.constraints.biggest.height / 2);
-
-            final centerMarkerWidget = _myLocation(centerLocation, Colors.purple);
-
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onDoubleTap: _onDoubleTap,
-              onScaleStart: _onScaleStart,
-              onScaleUpdate: _onScaleUpdate,
-              child: Listener(
-                behavior: HitTestBehavior.opaque,
-                onPointerSignal: (event) {
-                  if (event is PointerScrollEvent) {
-                    final delta = event.scrollDelta;
-
-                    controller.zoom -= delta.dy / 1000.0;
-                    setState(() {});
-                  }
-                },
-                child: Stack(
-                  children: [
-                    Map(
-                      controller: controller,
-                      builder: (context, x, y, z) {
-                        //Legal notice: This url is only used for demo and educational purposes. You need a license key for production use.
-                        //Google Maps
-                        final url =
-                            'https://www.google.com/maps/vt/pb=!1m4!1m3!1i$z!2i$x!3i$y!2m3!1e0!2sm!3i420120488!3m7!2sen!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0!5m1!1e0!23i4111425';
-                        return CachedNetworkImage(
-                          imageUrl: url,
-                          fit: BoxFit.cover,
-                        );
-                      },
-                    ),
-                    ...markerWidgets,
-                    centerMarkerWidget,
-                  ],
-                ),
-              ),
-            );
-          },
-        );
+        return mapBuilder(watch);
       }),
       bottomSheet: Consumer<CafeProvider>(builder: (_, watch, __) {
         if (watch.state == ViewState.Busy) {
@@ -180,19 +131,83 @@ class _MapPageState extends State<MapPage> {
             child: CupertinoActivityIndicator(),
           );
         }
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.2,
-          child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: watch.cafeList.length,
-              itemBuilder: (context, index) {
-                CafeModel? item = watch.cafeList[index];
-                return Column(
-                  children: [Text(item?.name ?? ''), Text(item?.link ?? ''), Text(item?.address.toString() ?? '')],
-                );
-              }),
-        );
+        return bottomList(context, watch);
       }),
+    );
+  }
+
+  SizedBox bottomList(BuildContext context, CafeProvider watch) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.2,
+      child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: watch.cafeList.length,
+          itemBuilder: (context, index) {
+            CafeModel? item = watch.cafeList[index];
+            return InkWell(
+              onTap: () {
+                _launchUrl(Uri.parse(item?.link ?? ''));
+              },
+              child: Column(
+                children: [Text(item?.name ?? ''), Text(item?.link ?? ''), Text(item?.address.toString() ?? '')],
+              ),
+            );
+          }),
+    );
+  }
+
+  MapLayoutBuilder mapBuilder(CafeProvider watch) {
+    return MapLayoutBuilder(
+      controller: controller,
+      builder: (context, transformer) {
+        late dynamic markerWidgets = [];
+        if (watch.state != ViewState.Idle) {
+          markerWidgets = watch.cafeList.map(
+            (cafe) => _buildMarkerWidget(cafe!, transformer.fromLatLngToXYCoords(cafe.address!.latLng!), Colors.red),
+          );
+        }
+
+        final centerLocation =
+            Offset(transformer.constraints.biggest.width / 2, transformer.constraints.biggest.height / 2);
+        final centerMarkerWidget = _myLocation(centerLocation, Colors.purple);
+
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onDoubleTap: _onDoubleTap,
+          onScaleStart: _onScaleStart,
+          onScaleUpdate: _onScaleUpdate,
+          child: Listener(
+            behavior: HitTestBehavior.opaque,
+            onPointerSignal: (event) {
+              if (event is PointerScrollEvent) {
+                final delta = event.scrollDelta;
+
+                controller.zoom -= delta.dy / 1000.0;
+                setState(() {});
+              }
+            },
+            child: Stack(
+              children: [
+                Map(
+                  controller: controller,
+                  builder: (context, x, y, z) {
+                    //Legal notice: This url is only used for demo and educational purposes. You need a license key for production use.
+                    //Google Maps
+                    final url =
+                        'https://www.google.com/maps/vt/pb=!1m4!1m3!1i$z!2i$x!3i$y!2m3!1e0!2sm!3i420120488!3m7!2sen!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0!5m1!1e0!23i4111425';
+                    return CachedNetworkImage(
+                      imageUrl: url,
+                      fit: BoxFit.cover,
+                    );
+                  },
+                ),
+                if (watch.state == ViewState.Idle) ...markerWidgets,
+                centerMarkerWidget,
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

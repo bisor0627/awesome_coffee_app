@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-
+import 'package:http/http.dart' as http show get, Response;
 import 'package:awesome_cafe/global/model/address_model.dart';
 import 'package:awesome_cafe/global/model/cafe_model.dart';
 import 'package:awesome_cafe/global/provider/parent_provider.dart';
@@ -37,7 +37,7 @@ class CafeProvider extends ParentProvider {
 
       // return true;
     } catch (e) {
-      setStateIdle();
+      setStateError();
       // return false;
     }
   }
@@ -45,15 +45,20 @@ class CafeProvider extends ParentProvider {
   Future getMarker() async {
     for (var i = 0; i < cafeList.length; i++) {
       if (cafeList[i]?.location != null) {
-        Map<String, dynamic> location = HttpManager().parseJson(
-            await HttpManager().getHttp('https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode', keys: {
-          'query': cafeList[i]!.location,
-        }, headers: {
-          'X-NCP-APIGW-API-KEY-ID': k_NCP_APIGW_ID,
-          'X-NCP-APIGW-API-KEY': k_NCP_APIGW_KEY
-        }));
-        cafeList[i]?.address = AddresssModel.fromMap(location['addresses'][0]);
-        // markers.add();
+        try {
+          Map<String, dynamic> location = HttpManager().parseJson(
+              await HttpManager().getHttp('https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode', keys: {
+            'query': cafeList[i]!.location,
+          }, headers: {
+            'X-NCP-APIGW-API-KEY-ID': k_NCP_APIGW_ID,
+            'X-NCP-APIGW-API-KEY': k_NCP_APIGW_KEY
+          }));
+          cafeList[i]?.address = AddresssModel.fromMap(location['addresses'][0]);
+          // markers.add();
+        } catch (e) {
+          debugPrint(e.toString());
+          break;
+        }
       }
     }
   }

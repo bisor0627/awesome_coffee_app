@@ -23,8 +23,8 @@ void main() {
         'X-NCP-APIGW-API-KEY': k_NCP_APIGW_KEY
       }));
       debugPrint(getData['addresses'].toString());
-      AddresssModel testData = AddresssModel.fromMap(getData['addresses'][0]);
-      debugPrint(testData.toJson());
+      // AddresssModel testData = AddresssModel.fromMap(getData['addresses'][0]);
+      // debugPrint(testData.toJson());
     });
   });
 }
