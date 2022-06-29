@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:awesome_cafe/pages/web_view_page.dart';
 import 'package:flutter/material.dart';
 import 'package:awesome_cafe/global/enum/view_state.dart';
 import 'package:awesome_cafe/global/model/cafe_model.dart';
@@ -11,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:latlng/latlng.dart';
 import 'package:map/map.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key, required this.title}) : super(key: key);
@@ -78,15 +77,14 @@ class _MapPageState extends State<MapPage> {
                 child: Column(children: [Text(cafe.name), Text(cafe.location)]),
               ),
         onTap: () {
-          showDialog(
-            context: context,
-            builder: (context) => const AlertDialog(
-              content: Text('You have clicked a marker!'),
-            ),
-          );
+          _launchUrl(Uri.parse(cafe.link));
         },
       ),
     );
+  }
+
+  void _launchUrl(Uri url) async {
+    if (!await launchUrl(url)) throw 'Could not launch $url';
   }
 
   Widget _myLocation(Offset pos, Color color, [IconData icon = CupertinoIcons.smallcircle_circle_fill]) {

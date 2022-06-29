@@ -13,7 +13,6 @@ import 'package:latlng/latlng.dart';
 
 class CafeProvider extends ParentProvider {
   String? body;
-  List<String> items = [];
   Future pushCafe() async {}
   List<CafeModel?> cafeList = [];
   List<LatLng> markers = [];
@@ -27,29 +26,27 @@ class CafeProvider extends ParentProvider {
       if (data.body?.innerHtml != null) {
         String inner = data.body?.innerHtml ?? '';
 
-        items = sliceACafe(inner.substring(inner.indexOf('## 지역'), inner.indexOf('## 도움을 주신 분들')));
-
         // setStateIdle();
 
-        items.forEach((element) {
+        sliceACafe(inner.substring(inner.indexOf('## 지역'), inner.indexOf('## 도움을 주신 분들'))).forEach((element) {
           cafeList.add(sliceACafeSpec(element));
         });
-        getMarker();
+        await getMarker();
         setStateIdle();
       }
 
       // return true;
     } catch (e) {
+      setStateIdle();
       // return false;
     }
   }
 
   Future getMarker() async {
-    final HttpManager httpManager = HttpManager();
     for (var i = 0; i < cafeList.length; i++) {
       if (cafeList[i]?.location != null) {
-        Map<String, dynamic> location = httpManager
-            .parseJson(await httpManager.getHttp('https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode', keys: {
+        Map<String, dynamic> location = HttpManager().parseJson(
+            await HttpManager().getHttp('https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode', keys: {
           'query': cafeList[i]!.location,
         }, headers: {
           'X-NCP-APIGW-API-KEY-ID': k_NCP_APIGW_ID,
